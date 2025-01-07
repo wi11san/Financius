@@ -1,0 +1,18 @@
+# Ignorar a pasta .vs (arquivos de configuração do Visual Studio)
+.vs/
+
+# Ignorar a pasta bin/ (arquivos de compilação)
+bin/
+
+# Ignorar a pasta obj/ (arquivos de build intermediários)
+obj/
+
+# Ignorar arquivos de log
+*.log
+
+# Ignorar arquivos de configuração do sistema
+Thumbs.db
+Desktop.ini
+
+# Ignorar arquivos do sistema Mac
+.DS_Store
