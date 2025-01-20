@@ -27,4 +27,6 @@ app.MapStaticAssets();
 app.MapRazorPages()
    .WithStaticAssets();
 
+app.MapFallbackToPage("/Login");
+
 app.Run();

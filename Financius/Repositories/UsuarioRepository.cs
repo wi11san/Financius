@@ -1,40 +1,40 @@
 ﻿using Dapper;
-using Financius.Data;
 using Financius.Models;
 using Financius.Repositories.Interfaces;
 using System.Data;
+using Microsoft.Data.SqlClient;
 
 namespace Financius.Repositories
 {
     public class UsuarioRepository : IUsuarioRepository
     {
-        private readonly DbContext _dbContext;
+        private readonly IConfiguration _configuration;
 
-        public UsuarioRepository(DbContext dbContext)
+        public UsuarioRepository(IConfiguration configuration)
         {
-            _dbContext = dbContext;
+            _configuration = configuration;
         }
 
-        public async Task<IEnumerable<Usuario>> BuscaUsuariosAsync()
+        public async Task<IEnumerable<UsuarioModel>> BuscaUsuariosAsync()
         {
-            using (var connection = _dbContext.CreateConnection())
+            using var connection = new SqlConnection(_configuration.GetConnectionString("FinanciusDB"));
             {
-                var resultado = await connection.QueryAsync<Usuario>(
-                    "dbo.sp_GetUsuarios",
-                    CommandType.StoredProcedure);
+                var resultado = await connection.QueryAsync<UsuarioModel>(
+                    "dbo.sp_BuscaUsuarios",
+                    commandType: CommandType.StoredProcedure);
 
                 return resultado;
             }
         }
 
-        public async Task<Usuario> BuscaUsuarioPorIdAsync(int id)
+        public async Task<UsuarioModel> BuscaUsuarioPorIdAsync(int id)
         {
-            using (var connection = _dbContext.CreateConnection())
+            using var connection = new SqlConnection(_configuration.GetConnectionString("FinanciusDB"));
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@Id", id);
 
-                var resultado = await connection.QuerySingleOrDefaultAsync<Usuario>(
+                var resultado = await connection.QuerySingleOrDefaultAsync<UsuarioModel>(
                     "dbo.sp_BuscaUsuarioPorId",
                     parameters,
                     commandType: CommandType.StoredProcedure);
@@ -43,14 +43,14 @@ namespace Financius.Repositories
             }
         }
 
-        public async Task<int> CriaUsuarioAsync(Usuario usuario)
+        public async Task<int> CriaUsuarioAsync(UsuarioModel usuario)
         {
-            using (var connection = _dbContext.CreateConnection())
+            using var connection = new SqlConnection(_configuration.GetConnectionString("FinanciusDB"));
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@Nome", usuario.Nome);
                 parameters.Add("@Email", usuario.Email);
-                parameters.Add("@SenhaHash", usuario.SenhaHash);
+                parameters.Add("@Senha", usuario.Senha);
 
                 var resultado = await connection.ExecuteAsync(
                     "dbo.sp_CriaUsuario",
@@ -61,15 +61,15 @@ namespace Financius.Repositories
             }
         }
 
-        public async Task<int> AtualizaUsuarioAsync(Usuario usuario)
+        public async Task<int> AtualizaUsuarioAsync(UsuarioModel usuario)
         {
-            using (var connection = _dbContext.CreateConnection())
+            using var connection = new SqlConnection(_configuration.GetConnectionString("FinanciusDB"));
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@IdUsuario", usuario.IdUsuario);
                 parameters.Add("@Nome", usuario.Nome);
                 parameters.Add("@Email", usuario.Email);
-                parameters.Add("@SenhaHash", usuario.SenhaHash);
+                parameters.Add("@Senha", usuario.Senha);
 
                 var resultado = await connection.ExecuteAsync(
                     "dbo.sp_AtualizaUsuario",
@@ -82,7 +82,7 @@ namespace Financius.Repositories
 
         public async Task<int> DeleteUsuarioAsync(int id)
         {
-            using (var connection = _dbContext.CreateConnection())
+            using var connection = new SqlConnection(_configuration.GetConnectionString("FinanciusDB"));
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@Id", id);
